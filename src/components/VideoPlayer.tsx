@@ -2,6 +2,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import {
   Play,
   Pause,
+  Volume1,
   Volume2,
   VolumeX,
   Maximize,
@@ -93,6 +94,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const [volume, setVolume] = useState(1);
   const [isMuted, setIsMuted] = useState(false);
+  const prevVolumeRef = useRef<number>(1);
   const [playbackRate, setPlaybackRate] = useState(1);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showSafeZone, setShowSafeZone] = useState(false);
@@ -137,19 +139,39 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   }, []);
 
   const handleVolumeChange = (newVol: number) => {
-    setVolume(newVol);
-    if (videoRef.current) {
-      videoRef.current.volume = newVol;
-      videoRef.current.muted = newVol === 0;
-      setIsMuted(newVol === 0);
+    const clamped = Math.max(0, Math.min(1, newVol));
+    setVolume(clamped);
+    if (clamped === 0) {
+      setIsMuted(true);
+      if (videoRef.current) {
+        videoRef.current.volume = 0;
+        videoRef.current.muted = true;
+      }
+    } else {
+      setIsMuted(false);
+      prevVolumeRef.current = clamped;
+      if (videoRef.current) {
+        videoRef.current.volume = clamped;
+        videoRef.current.muted = false;
+      }
     }
   };
 
   const handleToggleMute = () => {
     if (!videoRef.current) return;
-    const targetMute = !isMuted;
-    setIsMuted(targetMute);
-    videoRef.current.muted = targetMute;
+    if (isMuted || volume === 0) {
+      // Unmute: restore previous non-zero volume (or default 1)
+      const restoredVol = prevVolumeRef.current > 0 ? prevVolumeRef.current : 1;
+      setVolume(restoredVol);
+      setIsMuted(false);
+      videoRef.current.muted = false;
+      videoRef.current.volume = restoredVol;
+    } else {
+      // Mute: record current volume to restore later
+      prevVolumeRef.current = volume;
+      setIsMuted(true);
+      videoRef.current.muted = true;
+    }
   };
 
   const handleRateChange = (rate: number) => {
@@ -341,6 +363,14 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
             src={videoUrl}
             playsInline
             crossOrigin="anonymous"
+            onVolumeChange={(e) => {
+              const v = e.currentTarget;
+              setVolume(v.volume);
+              setIsMuted(v.muted || v.volume === 0);
+              if (v.volume > 0 && !v.muted) {
+                prevVolumeRef.current = v.volume;
+              }
+            }}
             onTimeUpdate={(e) => onTimeUpdate(e.currentTarget.currentTime)}
             onLoadedMetadata={(e) => {
               const v = e.currentTarget;
@@ -711,28 +741,45 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
               </select>
             </div>
 
-            {/* Volume */}
-            <div className="flex items-center gap-1.5">
+            {/* Volume & Mute Controls */}
+            <div
+              id="video-player-volume-control-group"
+              className="flex items-center gap-1.5 px-2 py-1 bg-slate-200/70 dark:bg-white/[0.05] rounded-xl border border-slate-300/60 dark:border-white/[0.09] backdrop-blur-md"
+            >
               <button
                 type="button"
+                id="video-player-mute-btn"
                 onClick={handleToggleMute}
-                className="p-1.5 text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white rounded-lg transition-colors"
+                className="p-1 text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white rounded-lg transition-colors focus:outline-none"
+                title={isMuted || volume === 0 ? 'Unmute (m)' : `Mute (m) - ${Math.round(volume * 100)}%`}
+                aria-label={isMuted || volume === 0 ? 'Unmute video audio' : 'Mute video audio'}
               >
                 {isMuted || volume === 0 ? (
                   <VolumeX className="w-4 h-4 text-rose-500" />
+                ) : volume < 0.5 ? (
+                  <Volume1 className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
                 ) : (
-                  <Volume2 className="w-4 h-4" />
+                  <Volume2 className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
                 )}
               </button>
               <input
                 type="range"
+                id="video-player-volume-slider"
                 min={0}
                 max={1}
-                step={0.05}
+                step={0.01}
                 value={isMuted ? 0 : volume}
                 onChange={(e) => handleVolumeChange(Number(e.target.value))}
-                className="w-16 accent-indigo-600 dark:accent-indigo-500 h-1.5 bg-slate-200 dark:bg-white/[0.1] rounded-lg cursor-pointer"
+                className="w-16 sm:w-20 accent-indigo-600 dark:accent-indigo-500 h-1.5 bg-slate-300 dark:bg-white/[0.15] rounded-lg cursor-pointer transition-all"
+                title={`Volume: ${isMuted || volume === 0 ? '0% (Muted)' : `${Math.round(volume * 100)}%`}`}
+                aria-label="Volume slider"
+                aria-valuenow={isMuted ? 0 : Math.round(volume * 100)}
+                aria-valuemin={0}
+                aria-valuemax={100}
               />
+              <span className="text-[10px] font-mono font-bold text-slate-500 dark:text-zinc-400 min-w-[28px] text-right select-none">
+                {isMuted || volume === 0 ? '0%' : `${Math.round(volume * 100)}%`}
+              </span>
             </div>
 
             {/* Fullscreen */}

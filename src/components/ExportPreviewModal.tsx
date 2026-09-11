@@ -15,6 +15,7 @@ import {
   Eye,
   Type,
   Maximize2,
+  Volume1,
   Volume2,
   VolumeX,
   Smartphone,
@@ -90,7 +91,9 @@ export const ExportPreviewModal: React.FC<ExportPreviewModalProps> = ({
   const [selectedAspectRatio, setSelectedAspectRatio] = useState<AspectRatioType>(videoAspectRatio);
   const [selectedFitMode, setSelectedFitMode] = useState<'fill' | 'fit'>(videoFitMode);
   const [sliceDuration, setSliceDuration] = useState<number>(5.0);
-  const [isAudioMuted, setIsAudioMuted] = useState<boolean>(true);
+  const [isAudioMuted, setIsAudioMuted] = useState<boolean>(false);
+  const [audioVolume, setAudioVolume] = useState<number>(0.8);
+  const prevAudioVolumeRef = useRef<number>(0.8);
 
   // Synchronize initial incoming settings when modal opens
   useEffect(() => {
@@ -135,6 +138,7 @@ export const ExportPreviewModal: React.FC<ExportPreviewModalProps> = ({
       sampleVideo = document.createElement('video');
       sampleVideo.crossOrigin = 'anonymous';
       sampleVideo.playsInline = true;
+      sampleVideo.volume = audioVolume;
       sampleVideo.muted = isAudioMuted;
       if (videoElement && (videoElement.src || videoElement.currentSrc)) {
         sampleVideo.src = videoElement.src || videoElement.currentSrc;
@@ -142,6 +146,7 @@ export const ExportPreviewModal: React.FC<ExportPreviewModalProps> = ({
       sampleVideoRef.current = sampleVideo;
     } else {
       sampleVideo = sampleVideoRef.current;
+      sampleVideo.volume = audioVolume;
       sampleVideo.muted = isAudioMuted;
       if (videoElement && (videoElement.src || videoElement.currentSrc) && sampleVideo.src !== (videoElement.src || videoElement.currentSrc)) {
         sampleVideo.src = videoElement.src || videoElement.currentSrc;
@@ -325,12 +330,40 @@ export const ExportPreviewModal: React.FC<ExportPreviewModalProps> = ({
 
   const handleToggleAudio = () => {
     const vid = sampleVideoRef.current;
-    if (vid) {
-      const nextMuted = !isAudioMuted;
-      vid.muted = nextMuted;
-      setIsAudioMuted(nextMuted);
+    if (isAudioMuted || audioVolume === 0) {
+      const restored = prevAudioVolumeRef.current > 0 ? prevAudioVolumeRef.current : 0.8;
+      setIsAudioMuted(false);
+      setAudioVolume(restored);
+      if (vid) {
+        vid.muted = false;
+        vid.volume = restored;
+      }
     } else {
-      setIsAudioMuted(!isAudioMuted);
+      prevAudioVolumeRef.current = audioVolume;
+      setIsAudioMuted(true);
+      if (vid) {
+        vid.muted = true;
+      }
+    }
+  };
+
+  const handleAudioVolumeChange = (newVol: number) => {
+    const clamped = Math.max(0, Math.min(1, newVol));
+    setAudioVolume(clamped);
+    const vid = sampleVideoRef.current;
+    if (clamped === 0) {
+      setIsAudioMuted(true);
+      if (vid) {
+        vid.muted = true;
+        vid.volume = 0;
+      }
+    } else {
+      setIsAudioMuted(false);
+      prevAudioVolumeRef.current = clamped;
+      if (vid) {
+        vid.muted = false;
+        vid.volume = clamped;
+      }
     }
   };
 
@@ -497,19 +530,54 @@ export const ExportPreviewModal: React.FC<ExportPreviewModalProps> = ({
                     <span className="hidden sm:inline">Loop</span>
                   </button>
 
-                  <button
-                    type="button"
-                    id="export-preview-mute-toggle-btn"
-                    onClick={handleToggleAudio}
-                    className={`p-2 rounded-xl border transition-all ${
-                      !isAudioMuted
-                        ? 'bg-emerald-950/80 border-emerald-500/50 text-emerald-300'
-                        : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-zinc-200'
-                    }`}
-                    title={isAudioMuted ? 'Unmute preview audio' : 'Mute preview audio'}
+                  {/* Volume Slider & Mute Toggle */}
+                  <div
+                    id="export-preview-volume-control-group"
+                    className="flex items-center gap-1.5 px-2 py-1 bg-zinc-900 border border-zinc-800 rounded-xl"
                   >
-                    {isAudioMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
-                  </button>
+                    <button
+                      type="button"
+                      id="export-preview-mute-toggle-btn"
+                      onClick={handleToggleAudio}
+                      className={`p-1.5 rounded-lg transition-colors focus:outline-none ${
+                        isAudioMuted || audioVolume === 0
+                          ? 'text-rose-400 hover:text-rose-300'
+                          : 'text-zinc-400 hover:text-white'
+                      }`}
+                      title={
+                        isAudioMuted || audioVolume === 0
+                          ? 'Unmute preview audio'
+                          : `Mute preview audio (${Math.round(audioVolume * 100)}%)`
+                      }
+                      aria-label={isAudioMuted || audioVolume === 0 ? 'Unmute preview audio' : 'Mute preview audio'}
+                    >
+                      {isAudioMuted || audioVolume === 0 ? (
+                        <VolumeX className="w-4 h-4 text-rose-500" />
+                      ) : audioVolume < 0.5 ? (
+                        <Volume1 className="w-4 h-4 text-indigo-400" />
+                      ) : (
+                        <Volume2 className="w-4 h-4 text-indigo-400" />
+                      )}
+                    </button>
+                    <input
+                      type="range"
+                      id="export-preview-volume-slider"
+                      min={0}
+                      max={1}
+                      step={0.01}
+                      value={isAudioMuted ? 0 : audioVolume}
+                      onChange={(e) => handleAudioVolumeChange(Number(e.target.value))}
+                      className="w-16 sm:w-20 accent-indigo-500 h-1.5 bg-zinc-800 rounded-lg cursor-pointer transition-all"
+                      title={`Preview Volume: ${isAudioMuted || audioVolume === 0 ? '0% (Muted)' : `${Math.round(audioVolume * 100)}%`}`}
+                      aria-label="Preview volume level"
+                      aria-valuenow={isAudioMuted ? 0 : Math.round(audioVolume * 100)}
+                      aria-valuemin={0}
+                      aria-valuemax={100}
+                    />
+                    <span className="text-[10px] font-mono font-bold text-zinc-400 min-w-[28px] text-right select-none">
+                      {isAudioMuted || audioVolume === 0 ? '0%' : `${Math.round(audioVolume * 100)}%`}
+                    </span>
+                  </div>
                 </div>
 
                 <div className="flex items-center gap-2">
