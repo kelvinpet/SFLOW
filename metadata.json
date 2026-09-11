@@ -1,0 +1,6 @@
+{
+  "name": "ScribeFlow",
+  "description": "ScribeFlow - Modern video caption generator and subtitle studio with AI transcription, kinetic word highlights, bilingual dual subtitles, and video export.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
