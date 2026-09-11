@@ -2,6 +2,125 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+@theme {
+  --color-indigo-50: var(--app-accent-50, #ecfeff);
+  --color-indigo-100: var(--app-accent-100, #cffafe);
+  --color-indigo-200: var(--app-accent-200, #a5f3fc);
+  --color-indigo-300: var(--app-accent-300, #67e8f9);
+  --color-indigo-400: var(--app-accent-400, #22d3ee);
+  --color-indigo-500: var(--app-accent-500, #06b6d4);
+  --color-indigo-600: var(--app-accent-600, #0891b2);
+  --color-indigo-700: var(--app-accent-700, #0e7490);
+  --color-indigo-800: var(--app-accent-800, #155e75);
+  --color-indigo-900: var(--app-accent-900, #164e63);
+  --color-indigo-950: var(--app-accent-950, #083344);
+}
+
+/* ====================================================
+   SCRIBEFLOW COHESIVE THEME SYSTEM (LIGHT & DARK)
+   ==================================================== */
+
+/* --- Default Palette: Cyber Cyan & Studio Slate --- */
+:root,
+html[data-palette="cyber-cyan"] {
+  --app-accent-name: 'Cyber Cyan';
+  --app-accent-50: #ecfeff;
+  --app-accent-100: #cffafe;
+  --app-accent-200: #a5f3fc;
+  --app-accent-300: #67e8f9;
+  --app-accent-400: #22d3ee;
+  --app-accent-500: #06b6d4;
+  --app-accent-600: #0891b2;
+  --app-accent-700: #0e7490;
+  --app-accent-800: #155e75;
+  --app-accent-900: #164e63;
+  --app-accent-950: #083344;
+  --app-accent-primary: #06b6d4;
+  --app-accent-glow: rgba(6, 182, 212, 0.18);
+  --app-bg-dark: #080b11;
+  --app-card-dark: #0f141f;
+}
+
+/* --- Palette 2: Emerald Mint --- */
+html[data-palette="emerald-mint"] {
+  --app-accent-name: 'Emerald Mint';
+  --app-accent-50: #ecfdf5;
+  --app-accent-100: #d1fae5;
+  --app-accent-200: #a7f3d0;
+  --app-accent-300: #6ee7b7;
+  --app-accent-400: #34d399;
+  --app-accent-500: #10b981;
+  --app-accent-600: #059669;
+  --app-accent-700: #047857;
+  --app-accent-800: #065f46;
+  --app-accent-900: #064e3b;
+  --app-accent-950: #022c22;
+  --app-accent-primary: #10b981;
+  --app-accent-glow: rgba(16, 185, 129, 0.18);
+  --app-bg-dark: #050807;
+  --app-card-dark: #0b130e;
+}
+
+/* --- Palette 3: Electric Violet --- */
+html[data-palette="electric-violet"] {
+  --app-accent-name: 'Electric Violet';
+  --app-accent-50: #f5f3ff;
+  --app-accent-100: #ede9fe;
+  --app-accent-200: #ddd6fe;
+  --app-accent-300: #c4b5fd;
+  --app-accent-400: #a78bfa;
+  --app-accent-500: #8b5cf6;
+  --app-accent-600: #7c3aed;
+  --app-accent-700: #6d28d9;
+  --app-accent-800: #5b21b6;
+  --app-accent-900: #4c1d95;
+  --app-accent-950: #2e1065;
+  --app-accent-primary: #8b5cf6;
+  --app-accent-glow: rgba(139, 92, 246, 0.18);
+  --app-bg-dark: #0c0814;
+  --app-card-dark: #150f24;
+}
+
+/* --- Palette 4: Warm Amber --- */
+html[data-palette="warm-amber"] {
+  --app-accent-name: 'Warm Amber';
+  --app-accent-50: #fffbeb;
+  --app-accent-100: #fef3c7;
+  --app-accent-200: #fde68a;
+  --app-accent-300: #fcd34d;
+  --app-accent-400: #fbbf24;
+  --app-accent-500: #f59e0b;
+  --app-accent-600: #d97706;
+  --app-accent-700: #b45309;
+  --app-accent-800: #92400e;
+  --app-accent-900: #78350f;
+  --app-accent-950: #451a03;
+  --app-accent-primary: #f59e0b;
+  --app-accent-glow: rgba(245, 158, 11, 0.18);
+  --app-bg-dark: #12100b;
+  --app-card-dark: #1c1810;
+}
+
+/* --- Palette 5: Classic Indigo --- */
+html[data-palette="classic-indigo"] {
+  --app-accent-name: 'Classic Indigo';
+  --app-accent-50: #eef2ff;
+  --app-accent-100: #e0e7ff;
+  --app-accent-200: #c7d2fe;
+  --app-accent-300: #a5b4fc;
+  --app-accent-400: #818cf8;
+  --app-accent-500: #6366f1;
+  --app-accent-600: #4f46e5;
+  --app-accent-700: #4338ca;
+  --app-accent-800: #3730a3;
+  --app-accent-900: #312e81;
+  --app-accent-950: #1e1b4b;
+  --app-accent-primary: #6366f1;
+  --app-accent-glow: rgba(99, 102, 241, 0.18);
+  --app-bg-dark: #090a0f;
+  --app-card-dark: #111420;
+}
+
 @keyframes bounceShort {
   0%, 100% {
     transform: scale(1.18);
@@ -17,7 +136,7 @@
 
 /* Bento Dot Matrix Background Pattern */
 .bg-bento-dots {
-  background-image: radial-gradient(rgba(104, 75, 235, 0.15) 1px, transparent 1px);
+  background-image: radial-gradient(var(--app-accent-glow, rgba(6, 182, 212, 0.18)) 1px, transparent 1px);
   background-size: 20px 20px;
 }
 
@@ -34,9 +153,6 @@ html.light .bg-bento-grid {
     linear-gradient(to bottom, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
 }
 
-/* ====================================================
-   SCRIBEFLOW COHESIVE THEME SYSTEM (LIGHT & DARK)
-   ==================================================== */
 html.light {
   color-scheme: light;
 }
@@ -76,4 +192,5 @@ html.light ::-webkit-scrollbar-thumb {
 html.light ::-webkit-scrollbar-thumb:hover {
   background: rgba(0, 0, 0, 0.25);
 }
+
 

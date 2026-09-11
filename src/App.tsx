@@ -33,6 +33,7 @@ import {
   CustomKeybindings,
   AutoSaveData,
   PendingSessionRecovery,
+  AccentPaletteId,
 } from './types';
 import { DEFAULT_STYLE, SUBTITLE_PRESETS } from './data/presets';
 import { SAMPLE_VIDEOS, SampleVideoItem } from './data/sampleVideo';
@@ -185,6 +186,22 @@ export default function App() {
     return 'dark';
   });
 
+  // Theme Accent Palette State (Default: Cyber Cyan & Studio Slate)
+  const [accentPalette, setAccentPalette] = useState<AccentPaletteId>(() => {
+    try {
+      const saved = localStorage.getItem('subly_accent_palette');
+      if (
+        saved &&
+        ['cyber-cyan', 'emerald-mint', 'electric-violet', 'warm-amber', 'classic-indigo'].includes(
+          saved
+        )
+      ) {
+        return saved as AccentPaletteId;
+      }
+    } catch {}
+    return 'cyber-cyan';
+  });
+
   useEffect(() => {
     document.documentElement.classList.remove('light', 'dark');
     document.documentElement.classList.add(themeMode);
@@ -192,6 +209,13 @@ export default function App() {
       localStorage.setItem('subly_theme_mode', themeMode);
     } catch {}
   }, [themeMode]);
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-palette', accentPalette);
+    try {
+      localStorage.setItem('subly_accent_palette', accentPalette);
+    } catch {}
+  }, [accentPalette]);
 
   const handleToggleThemeMode = () => {
     setThemeMode((prev) => (prev === 'dark' ? 'light' : 'dark'));
@@ -1538,6 +1562,8 @@ export default function App() {
           onReturnToEditor={() => setCurrentScreen('editor')}
           themeMode={themeMode}
           onToggleThemeMode={handleToggleThemeMode}
+          accentPalette={accentPalette}
+          onSelectPalette={setAccentPalette}
           onOpenApiKeyModal={() => setIsApiKeyOpen(true)}
           onOpenShortcutsModal={() => setIsShortcutsOpen(true)}
           onOpenTourModal={() => {
@@ -1596,13 +1622,13 @@ export default function App() {
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
-      className="min-h-screen bg-slate-50 dark:bg-zinc-950 text-slate-900 dark:text-zinc-100 flex flex-col font-sans relative selection:bg-indigo-600 selection:text-white transition-colors duration-200"
+      className="min-h-screen bg-slate-50 dark:bg-[#080b11] text-slate-900 dark:text-zinc-100 flex flex-col font-sans relative selection:bg-indigo-600 selection:text-white transition-colors duration-200"
     >
       {/* Ambient Glassmorphic Background Gradients */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden z-0" aria-hidden="true">
         <div className="absolute -top-40 left-1/4 w-96 h-96 bg-indigo-600/[0.08] rounded-full blur-3xl" />
-        <div className="absolute top-1/3 -right-20 w-80 h-80 bg-purple-600/[0.06] rounded-full blur-3xl" />
-        <div className="absolute -bottom-20 left-1/3 w-96 h-96 bg-blue-600/[0.06] rounded-full blur-3xl" />
+        <div className="absolute top-1/3 -right-20 w-80 h-80 bg-indigo-400/[0.05] rounded-full blur-3xl" />
+        <div className="absolute -bottom-20 left-1/3 w-96 h-96 bg-indigo-500/[0.06] rounded-full blur-3xl" />
       </div>
 
       {/* Drag & Drop Visual Overlay */}
@@ -1631,6 +1657,8 @@ export default function App() {
         onUpdateProjectTitle={setCurrentVideoName}
         themeMode={themeMode}
         onToggleThemeMode={handleToggleThemeMode}
+        accentPalette={accentPalette}
+        onSelectPalette={setAccentPalette}
         onResetProject={handleResetProject}
         onNewProject={handleResetProject}
         hasApiKey={Boolean(apiKey || groqKey || deepgramKey)}

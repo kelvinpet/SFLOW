@@ -252,3 +252,19 @@ export interface BulkSnappingState {
   activeTimeRange: { start: number; end: number } | null;
   activeTextPreview: string;
 }
+
+export type AccentPaletteId =
+  | 'cyber-cyan'
+  | 'emerald-mint'
+  | 'electric-violet'
+  | 'warm-amber'
+  | 'classic-indigo';
+
+export interface AccentPaletteOption {
+  id: AccentPaletteId;
+  name: string;
+  subtitle: string;
+  primaryColor: string;
+  hoverColor: string;
+  darkBg: string;
+}

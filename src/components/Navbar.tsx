@@ -13,8 +13,6 @@ import {
   Check,
   Loader2,
   FolderOpen,
-  Sun,
-  Moon,
   Edit3,
   Save,
   Palette,
@@ -24,6 +22,8 @@ import {
   Eye,
 } from 'lucide-react';
 import { SAMPLE_VIDEOS, SampleVideoItem } from '../data/sampleVideo';
+import { AccentPaletteId } from '../types';
+import { ThemePaletteSwitcher } from './ThemePaletteSwitcher';
 
 interface NavbarProps {
   onGoHome?: () => void;
@@ -41,6 +41,8 @@ interface NavbarProps {
   onUpdateProjectTitle?: (title: string) => void;
   themeMode?: 'dark' | 'light';
   onToggleThemeMode?: () => void;
+  accentPalette?: AccentPaletteId;
+  onSelectPalette?: (palette: AccentPaletteId) => void;
   onResetProject: () => void;
   onNewProject?: () => void;
   hasApiKey: boolean;
@@ -66,6 +68,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   onUpdateProjectTitle,
   themeMode = 'dark',
   onToggleThemeMode,
+  accentPalette = 'cyber-cyan',
+  onSelectPalette,
   onResetProject,
   onNewProject,
   hasApiKey,
@@ -331,23 +335,16 @@ export const Navbar: React.FC<NavbarProps> = ({
             )}
           </button>
 
-          {/* Light / Dark Mode Toggle Button */}
-          {onToggleThemeMode && (
-            <button
-              type="button"
-              id="navbar-theme-toggle-btn"
-              onClick={onToggleThemeMode}
-              className="p-1.5 sm:px-2 py-1.5 bg-white dark:bg-white/[0.05] hover:bg-slate-100 dark:hover:bg-white/[0.1] border border-slate-200 dark:border-white/[0.09] text-slate-700 dark:text-zinc-300 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-all shadow-xs active:scale-95"
-              title={`Switch to ${themeMode === 'dark' ? 'Light' : 'Dark'} Mode`}
-            >
-              {themeMode === 'dark' ? (
-                <Sun className="w-3.5 h-3.5 text-amber-400" />
-              ) : (
-                <Moon className="w-3.5 h-3.5 text-slate-600" />
-              )}
-              <span className="hidden md:inline">{themeMode === 'dark' ? 'Light' : 'Dark'}</span>
-            </button>
+          {/* Theme Mode & Color Palette Switcher */}
+          {onToggleThemeMode && onSelectPalette && (
+            <ThemePaletteSwitcher
+              themeMode={themeMode}
+              onToggleThemeMode={onToggleThemeMode}
+              accentPalette={accentPalette}
+              onSelectPalette={onSelectPalette}
+            />
           )}
+
 
           {/* Settings / API Key Modal Button */}
           <button

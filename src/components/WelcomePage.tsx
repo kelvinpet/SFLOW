@@ -48,7 +48,7 @@ import {
   Type,
   Scissors,
 } from 'lucide-react';
-import { Caption, SubtitleStyle, PendingSessionRecovery } from '../types';
+import { Caption, SubtitleStyle, PendingSessionRecovery, AccentPaletteId } from '../types';
 import { SAMPLE_VIDEOS, SampleVideoItem } from '../data/sampleVideo';
 import { PROJECT_TEMPLATES, ProjectTemplate } from '../data/projectTemplates';
 import { SUBTITLE_PRESETS } from '../data/presets';
@@ -57,6 +57,7 @@ import {
   getSavedProjects,
   deleteProject,
 } from '../utils/projectManager';
+import { ThemePaletteSwitcher } from './ThemePaletteSwitcher';
 
 interface WelcomePageProps {
   onStartNewProject: () => void;
@@ -74,6 +75,8 @@ interface WelcomePageProps {
   onReturnToEditor: () => void;
   themeMode: 'dark' | 'light';
   onToggleThemeMode: () => void;
+  accentPalette?: AccentPaletteId;
+  onSelectPalette?: (palette: AccentPaletteId) => void;
   onOpenApiKeyModal: () => void;
   onOpenShortcutsModal: () => void;
   onOpenTourModal: () => void;
@@ -96,6 +99,8 @@ export const WelcomePage: React.FC<WelcomePageProps> = ({
   onReturnToEditor,
   themeMode,
   onToggleThemeMode,
+  accentPalette = 'cyber-cyan',
+  onSelectPalette,
   onOpenApiKeyModal,
   onOpenShortcutsModal,
   onOpenTourModal,
@@ -256,11 +261,11 @@ export const WelcomePage: React.FC<WelcomePageProps> = ({
   return (
     <div
       id="landing-page-root"
-      className="min-h-screen w-full bg-slate-50 dark:bg-[#090A0F] text-slate-900 dark:text-zinc-100 transition-colors duration-200 selection:bg-indigo-500 selection:text-white relative overflow-x-hidden"
+      className="min-h-screen w-full bg-slate-50 dark:bg-[#080B11] text-slate-900 dark:text-zinc-100 transition-colors duration-200 selection:bg-indigo-500 selection:text-white relative overflow-x-hidden"
     >
       {/* Ambient Atmospheric Background Glows for Widescreen */}
       <div className="absolute top-0 left-1/4 w-[700px] h-[500px] bg-indigo-600/10 dark:bg-indigo-500/10 blur-[130px] rounded-full pointer-events-none -z-10" />
-      <div className="absolute top-40 right-10 w-[600px] h-[400px] bg-purple-600/10 dark:bg-purple-500/10 blur-[120px] rounded-full pointer-events-none -z-10" />
+      <div className="absolute top-40 right-10 w-[600px] h-[400px] bg-indigo-400/10 dark:bg-indigo-400/10 blur-[120px] rounded-full pointer-events-none -z-10" />
 
       {/* Hidden File Input for Video Upload */}
       <input
@@ -274,7 +279,7 @@ export const WelcomePage: React.FC<WelcomePageProps> = ({
       {/* Sticky Full-Width Navigation Header */}
       <header
         id="landing-header"
-        className="sticky top-0 z-50 w-full bg-white/80 dark:bg-[#090A0F]/80 backdrop-blur-xl border-b border-slate-200/80 dark:border-white/[0.07] px-4 sm:px-8 lg:px-12 xl:px-16 2xl:px-20 py-3.5 transition-all"
+        className="sticky top-0 z-50 w-full bg-white/80 dark:bg-[#080B11]/80 backdrop-blur-xl border-b border-slate-200/80 dark:border-white/[0.07] px-4 sm:px-8 lg:px-12 xl:px-16 2xl:px-20 py-3.5 transition-all"
       >
         <div className="w-full max-w-[1920px] mx-auto flex items-center justify-between gap-4">
           {/* Brand Logo & Studio Name */}
@@ -360,20 +365,29 @@ export const WelcomePage: React.FC<WelcomePageProps> = ({
               <span>API Keys</span>
             </button>
 
-            {/* Theme Toggle Button */}
-            <button
-              type="button"
-              id="landing-theme-toggle-btn"
-              onClick={onToggleThemeMode}
-              className="p-2 text-slate-600 dark:text-zinc-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-lg transition-colors"
-              title={`Switch to ${themeMode === 'dark' ? 'Light' : 'Dark'} Mode`}
-            >
-              {themeMode === 'dark' ? (
-                <Sun className="w-4 h-4 text-amber-400" />
-              ) : (
-                <Moon className="w-4 h-4 text-slate-700" />
-              )}
-            </button>
+            {/* Theme Mode & Color Palette Switcher */}
+            {onSelectPalette ? (
+              <ThemePaletteSwitcher
+                themeMode={themeMode}
+                onToggleThemeMode={onToggleThemeMode}
+                accentPalette={accentPalette}
+                onSelectPalette={onSelectPalette}
+              />
+            ) : (
+              <button
+                type="button"
+                id="landing-theme-toggle-btn"
+                onClick={onToggleThemeMode}
+                className="p-2 text-slate-600 dark:text-zinc-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-lg transition-colors"
+                title={`Switch to ${themeMode === 'dark' ? 'Light' : 'Dark'} Mode`}
+              >
+                {themeMode === 'dark' ? (
+                  <Sun className="w-4 h-4 text-amber-400" />
+                ) : (
+                  <Moon className="w-4 h-4 text-slate-700" />
+                )}
+              </button>
+            )}
 
             {/* Main Primary CTA Button */}
             {hasActiveProject ? (
